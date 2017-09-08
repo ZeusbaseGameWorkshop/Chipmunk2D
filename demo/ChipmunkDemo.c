@@ -36,6 +36,16 @@
 #include <limits.h>
 #include <stdarg.h>
 
+#ifdef _MSC_VER
+  // Needed for VS 2015 compatability
+  // http://stackoverflow.com/questions/30412951/unresolved-external-symbol-imp-fprintf-and-imp-iob-func-sdl2
+  #if _MSC_VER >= 1700
+	#ifndef __iob_func
+	  extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+	#endif
+  #endif
+#endif
+
 #include "GL/glew.h"
 #include "GL/glfw.h"
 
@@ -265,12 +275,22 @@ static char *PrintStringCursor;
 void
 ChipmunkDemoPrintString(char const *fmt, ...)
 {
+	if (PrintStringCursor == NULL) {
+		return;
+	}
+
 	ChipmunkDemoMessageString = PrintStringBuffer;
-	
+
 	va_list args;
 	va_start(args, fmt);
-	// TODO: should use vsnprintf here
-	PrintStringCursor += vsprintf(PrintStringCursor, fmt, args);
+	int remaining = sizeof(PrintStringBuffer) - (PrintStringCursor - PrintStringBuffer);
+	int would_write = vsnprintf(PrintStringCursor, remaining, fmt, args);
+	if (would_write > 0 && would_write < remaining) {
+		PrintStringCursor += would_write;
+	} else {
+		// encoding error or overflow, prevent further use until reinitialized
+		PrintStringCursor = NULL;
+	}
 	va_end(args);
 }
 

@@ -66,8 +66,8 @@
 	
 	{
 		cpVect a = cpvmult(cpvforangle(0.0), 1.0);
-		cpVect b = cpvmult(cpvforangle(M_PI/2.0), 2.0);
-		cpVect c = cpvadd(cpvmult(a, cpfcos(M_PI/4.0)), cpvmult(b, cpfsin(M_PI/4.0)));
+		cpVect b = cpvmult(cpvforangle(CP_PI/2.0), 2.0);
+		cpVect c = cpvadd(cpvmult(a, cpfcos(CP_PI/4.0)), cpvmult(b, cpfsin(CP_PI/4.0)));
 		cpVect v = cpvslerp(a, b, 0.5);
 		AssertNearlyZero(cpvdist(v, c));
 	}
@@ -93,23 +93,23 @@
 	// Slerp const
 	{
 		cpVect a = cpvmult(cpvforangle(0.0), 1.0);
-		cpVect b = cpvmult(cpvforangle(M_PI/2.0), 1.0);
-		cpVect c = cpvadd(cpvmult(a, cpfcos(M_PI/4.0)), cpvmult(b, cpfsin(M_PI/4.0)));
-		cpVect v = cpvslerpconst(a, b, M_PI/4.0);
+		cpVect b = cpvmult(cpvforangle(CP_PI/2.0), 1.0);
+		cpVect c = cpvadd(cpvmult(a, cpfcos(CP_PI/4.0)), cpvmult(b, cpfsin(CP_PI/4.0)));
+		cpVect v = cpvslerpconst(a, b, CP_PI/4.0);
 		AssertNearlyZero(cpvdist(v, c));
 	}
 	
 	{
 		cpVect a = cpvmult(cpvforangle(0.0), 1.0);
-		cpVect b = cpvmult(cpvforangle(M_PI/2.0), 1.0);
+		cpVect b = cpvmult(cpvforangle(CP_PI/2.0), 1.0);
 		cpVect c = b;
-		cpVect v = cpvslerpconst(a, b, M_PI/2.0);
+		cpVect v = cpvslerpconst(a, b, CP_PI/2.0);
 		AssertNearlyZero(cpvdist(v, c));
 	}
 	
 	{
 		cpVect a = cpvmult(cpvforangle(0.0), 1.0);
-		cpVect b = cpvmult(cpvforangle(M_PI/2.0), 1.0);
+		cpVect b = cpvmult(cpvforangle(CP_PI/2.0), 1.0);
 		cpVect c = b;
 		cpVect v = cpvslerpconst(a, b, INFINITY);
 		AssertNearlyZero(cpvdist(v, c));
@@ -117,7 +117,7 @@
 	
 	{
 		cpVect a = cpvmult(cpvforangle(0.0), 1.0);
-		cpVect b = cpvmult(cpvforangle(M_PI/2.0), 1.0);
+		cpVect b = cpvmult(cpvforangle(CP_PI/2.0), 1.0);
 		cpVect c = a;
 		cpVect v = cpvslerpconst(a, b, 0);
 		AssertNearlyZero(cpvdist(v, c));
@@ -125,10 +125,125 @@
 	
 	{
 		cpVect a = cpvmult(cpvforangle(0.0), 1.0);
-		cpVect b = cpvmult(cpvforangle(M_PI/2.0), 1.0);
-		cpVect c = cpvmult(cpvforangle(M_PI/4.0), 1.0);
-		cpVect v = cpvslerpconst(a, b, M_PI/4.0);
+		cpVect b = cpvmult(cpvforangle(CP_PI/2.0), 1.0);
+		cpVect c = cpvmult(cpvforangle(CP_PI/4.0), 1.0);
+		cpVect v = cpvslerpconst(a, b, CP_PI/4.0);
 		AssertNearlyZero(cpvdist(v, c));
+	}
+}
+
+-(void)testBBSegmentQuery
+{
+	{ // left
+		cpVect a = cpv(-2, 0);
+		cpVect b = cpv( 0, 0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqualWithAccuracy(t, 0.5, 1e-5);
+	}
+	
+	{ // right
+		cpVect a = cpv( 2, 0);
+		cpVect b = cpv( 0, 0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqualWithAccuracy(t, 0.5, 1e-5);
+	}
+	
+	{ // bottom
+		cpVect a = cpv(0, -2);
+		cpVect b = cpv(0,  0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqualWithAccuracy(t, 0.5, 1e-5);
+	}
+	
+	{ // top
+		cpVect a = cpv(0,  2);
+		cpVect b = cpv(0,  0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqualWithAccuracy(t, 0.5, 1e-5);
+	}
+	
+	{ // diagonal corner
+		cpVect a = cpv(-2, -2);
+		cpVect b = cpv( 0,  0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqualWithAccuracy(t, 0.5, 1e-5);
+	}
+	
+	{ // diagonal edge
+		cpVect a = cpv(-2, -1);
+		cpVect b = cpv( 0,  1);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqualWithAccuracy(t, 0.5, 1e-5);
+	}
+	
+	{ // x-aligned low.
+		cpVect a = cpv(-2, -1);
+		cpVect b = cpv( 0, -1);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, 0.5);
+	}
+	
+	{ // x-aligned high.
+		cpVect a = cpv(-2, 1);
+		cpVect b = cpv( 0, 1);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, 0.5);
+	}
+	
+	{ // y-aligned low.
+		cpVect a = cpv(-1, -2);
+		cpVect b = cpv(-1,  0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, 0.5);
+	}
+	
+	{ // y-aligned high.
+		cpVect a = cpv(1, -2);
+		cpVect b = cpv(1,  0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, 0.5);
+	}
+	
+	{ // Miss, x-aligned low.
+		cpVect a = cpv( 2, -2);
+		cpVect b = cpv( 0, -2);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, INFINITY);
+	}
+	
+	{ // Miss, x-aligned high.
+		cpVect a = cpv( 2, 2);
+		cpVect b = cpv( 0, 2);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, INFINITY);
+	}
+	
+	{ // Miss, y-aligned low.
+		cpVect a = cpv(-2, 2);
+		cpVect b = cpv(-2, 0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, INFINITY);
+	}
+	
+	{ // Miss, y-aligned high.
+		cpVect a = cpv(2, 2);
+		cpVect b = cpv(2, 0);
+		cpBB bb = cpBBNew(-1, -1, 1, 1);
+		cpFloat t = cpBBSegmentQuery(bb, a, b);
+		XCTAssertEqual(t, INFINITY);
 	}
 }
 

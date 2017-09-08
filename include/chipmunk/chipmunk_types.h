@@ -39,8 +39,8 @@
 
 #if CP_USE_CGTYPES
 	#if TARGET_OS_IPHONE
-		#import <CoreGraphics/CGGeometry.h>
-		#import <CoreGraphics/CGAffineTransform.h>
+		#include <CoreGraphics/CGGeometry.h>
+		#include <CoreGraphics/CGAffineTransform.h>
 	#elif TARGET_OS_MAC
 		#include <ApplicationServices/ApplicationServices.h>
 	#endif
@@ -111,13 +111,8 @@
 	#endif
 #endif
 
-#ifndef M_PI
-	#define M_PI 3.14159265358979323846264338327950288
-#endif
 
-#ifndef M_E
-	#define M_E 2.71828182845904523536028747135266250
-#endif
+#define CP_PI ((cpFloat)3.14159265358979323846264338327950288)
 
 
 /// Return the max of two cpFloats.

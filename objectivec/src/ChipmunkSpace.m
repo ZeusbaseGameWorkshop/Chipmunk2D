@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#define CP_ALLOW_PRIVATE_ACCESS
 #import "ObjectiveChipmunk/ObjectiveChipmunk.h"
+#import "chipmunk/chipmunk_private.h"
 #import "chipmunk/cpHastySpace.h"
 
 #import <objc/message.h>
@@ -98,10 +98,11 @@ typedef struct HandlerContext {
 
 +(instancetype)allocWithZone:(struct _NSZone *)zone
 {
+    Class class = self;
 #if CHIPMUNK_SPACE_USE_HASTY_SPACE
-	Class class = [ChipmunkHastySpace class];
-#else
-	Class class = [ChipmunkSpace class];
+    if (self == [ChipmunkSpace class]) {
+        class = [ChipmunkHastySpace class];
+    }
 #endif
 
 	return NSAllocateObject(class, 0, zone);
@@ -167,6 +168,7 @@ both(cpTimestamp, collisionPersistence, CollisionPersistence);
 getter(cpFloat, currentTimeStep, CurrentTimeStep);
 
 - (BOOL)isLocked {return cpSpaceIsLocked(_space);}
+- (BOOL)locked {return self.isLocked;}
 
 - (ChipmunkBody *)staticBody {return _staticBody;}
 
